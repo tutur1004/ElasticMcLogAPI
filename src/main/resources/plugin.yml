@@ -1,0 +1,10 @@
+name: ElasticMcLogAPI
+main: fr.milekat.elastimclogapi.Main
+version: 1.0
+api-version: 1.18
+description: 'API to add custom logs into an ElasticSearch database'
+authors:
+    - MileKat (tutur1004#8766)
+libraries:
+    - co.elastic.clients:elasticsearch-java:7.16.0
+    - com.fasterxml.jackson.core:jackson-databind:2.13.0
