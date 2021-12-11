@@ -1,5 +1,17 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.github.milekat'
+            artifactId = 'ESMcLog'
+            version = '1.0'
+            from components.java
+        }
+    }
 }
 
 repositories {
