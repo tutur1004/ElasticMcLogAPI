@@ -8,3 +8,8 @@ authors:
 libraries:
     - co.elastic.clients:elasticsearch-java:7.16.0
     - com.fasterxml.jackson.core:jackson-databind:2.13.0
+commands:
+    eslogapi-reload:
+        aliases: eslog-rl
+        permission: "admin.eslogapi"
+        description: "Reload ElasticMcLogAPI configurations file"
