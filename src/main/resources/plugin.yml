@@ -1,5 +1,5 @@
 name: ElasticMcLogAPI
-main: fr.milekat.elastimclogapi.Main
+main: fr.milekat.elastimclogapi.ESMcLog
 version: 1.0
 api-version: 1.18
 description: 'API to add custom logs into an ElasticSearch database'
