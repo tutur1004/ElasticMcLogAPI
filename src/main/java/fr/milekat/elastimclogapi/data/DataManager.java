@@ -9,6 +9,7 @@ import org.bukkit.plugin.Plugin;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 public class DataManager {
     private final Plugin plugin;
@@ -30,12 +31,19 @@ public class DataManager {
                 .create(
                         new CreateOperation.Builder<>()
                                 .index(configuration.getString("config.base-index-name", "mc-log") +
-                                        "-" + object.getClass().getName())
+                                        "-" + object.getClass().getName().toLowerCase(Locale.ROOT))
                                 .document(object)
                                 .build()
                 )
                 .build()
         );
+    }
+
+    /**
+     * Get pending BulkOperation
+     */
+    public List<BulkOperation> getPending() {
+        return pendingBulk;
     }
 
     /**
@@ -46,10 +54,17 @@ public class DataManager {
     }
 
     /**
+     * Start pool, nothing done if already started
+     */
+    public void startPool() {
+        if (pool==null) pool = new PoolSender(configuration, pendingBulk);
+    }
+
+    /**
      * Restart pool
      */
     public void restartPool() {
-        pool.stop();
+        if (pool!=null) closePool();
         pool = new PoolSender(configuration, pendingBulk);
     }
 
@@ -69,5 +84,14 @@ public class DataManager {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
+        pool = null;
+    }
+
+    /**
+     * Close without processing {@link #pendingBulk}
+     */
+    public void forceClosePool() {
+        pool.stop();
+        pool = null;
     }
 }

@@ -5,8 +5,9 @@ import fr.milekat.elastimclogapi.data.DataManager;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Main extends JavaPlugin {
-    private static DataManager dataManager;
+public class ESMcLog extends JavaPlugin {
+    private DataManager dataManager;
+    private static Api api;
 
     @Override
     public void onEnable() {
@@ -14,8 +15,9 @@ public class Main extends JavaPlugin {
         this.getConfig();
         // TODO: 11/12/2021 Debug :)
         dataManager = new DataManager(this);
+        api = new Api(dataManager);
         PluginCommand command = this.getCommand("eslogapi-reload");
-        if (command!=null) command.setExecutor(new ConfigRl());
+        if (command!=null) command.setExecutor(new ConfigRl(dataManager));
     }
 
     @Override
@@ -24,9 +26,9 @@ public class Main extends JavaPlugin {
     }
 
     /**
-     * Get data manager
+     * Get api
      */
-    public static DataManager getDataManager() {
-        return dataManager;
+    public static Api getApi() {
+        return api;
     }
 }
