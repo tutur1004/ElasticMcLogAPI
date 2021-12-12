@@ -7,7 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class ESMcLog extends JavaPlugin {
     private DataManager dataManager;
-    private static Api api;
+    private static ESMcLogApi ESMcLogApi;
 
     @Override
     public void onEnable() {
@@ -15,7 +15,7 @@ public class ESMcLog extends JavaPlugin {
         this.getConfig();
         // TODO: 11/12/2021 Debug :)
         dataManager = new DataManager(this);
-        api = new Api(dataManager);
+        ESMcLogApi = new ESMcLogApi(dataManager);
         PluginCommand command = this.getCommand("eslogapi-reload");
         if (command!=null) command.setExecutor(new ConfigRl(dataManager));
     }
@@ -28,7 +28,7 @@ public class ESMcLog extends JavaPlugin {
     /**
      * Get api
      */
-    public static Api getApi() {
-        return api;
+    public static ESMcLogApi getApi() {
+        return ESMcLogApi;
     }
 }

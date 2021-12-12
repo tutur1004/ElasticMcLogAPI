@@ -5,7 +5,7 @@ import fr.milekat.elastimclogapi.data.DataManager;
 
 import java.util.List;
 
-public record Api(DataManager dataManager) {
+public record ESMcLogApi(DataManager dataManager) {
     /**
      * Get pending BulkOperation
      */
