@@ -1,20 +1,31 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
 }
 
 publishing {
     publications {
         maven(MavenPublication) {
             groupId = 'com.github.milekat'
-            artifactId = 'ESMcLog'
+            artifactId = 'ElasticMcLogAPI'
             version = '1.0'
             from components.java
         }
     }
 }
 
+jar {
+    actions = [] as List<Action<? super Task>>
+    dependsOn('shadowJar')
+}
+
+shadowJar{
+    getArchiveClassifier().set(null)
+}
+
 repositories {
+    maven { url = 'https://jitpack.io' }
     maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     mavenCentral()
 }
@@ -24,7 +35,8 @@ compileJava.options.encoding = 'UTF-8'
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation group: 'com.github.tutur1004', name: 'MilekatUtils', version: '834fa1d4da'
     compileOnly group: 'org.spigotmc', name: 'spigot-api', version: '1.18-R0.1-SNAPSHOT'
-    compileOnly group: 'co.elastic.clients', name: 'elasticsearch-java', version: '7.16.0'
+    compileOnly group: 'co.elastic.clients', name: 'elasticsearch-java', version: '7.16.1'
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.0'
 }

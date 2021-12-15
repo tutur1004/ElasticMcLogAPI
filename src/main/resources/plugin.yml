@@ -6,7 +6,7 @@ description: 'API to add custom logs into an ElasticSearch database'
 authors:
     - MileKat (tutur1004#8766)
 libraries:
-    - co.elastic.clients:elasticsearch-java:7.16.0
+    - co.elastic.clients:elasticsearch-java:7.16.1
     - com.fasterxml.jackson.core:jackson-databind:2.13.0
 commands:
     eslogapi-reload:
