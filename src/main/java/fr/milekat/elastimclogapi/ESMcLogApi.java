@@ -1,9 +1,12 @@
 package fr.milekat.elastimclogapi;
 
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import fr.milekat.elastimclogapi.data.DataManager;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public record ESMcLogApi(DataManager dataManager) {
     /**
@@ -18,6 +21,20 @@ public record ESMcLogApi(DataManager dataManager) {
      */
     public void addPendingBulk(Object object) {
         dataManager.addPending(object);
+    }
+
+    /**
+     * Get the first hit object by query from index
+     */
+    public Object getObject(Class<?> classType, Map<String, Object> parameters) throws IOException {
+        return dataManager.query(classType, parameters).stream().findFirst();
+    }
+
+    /**
+     * Get a list of objects hits by query from index
+     */
+    public List<? extends Hit<?>> getObjects(Class<?> classType, Map<String, Object> parameters) throws IOException {
+        return dataManager.query(classType, parameters);
     }
 
     /**

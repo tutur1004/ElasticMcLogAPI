@@ -12,7 +12,7 @@ public class ESMcLog extends JavaPlugin {
     @Override
     public void onEnable() {
         //  Init config file
-        this.getConfig();
+        this.saveDefaultConfig();
         // TODO: 11/12/2021 Debug :)
         dataManager = new DataManager(this);
         ESMcLogApi = new ESMcLogApi(dataManager);

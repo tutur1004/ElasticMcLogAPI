@@ -1,15 +1,17 @@
 package fr.milekat.elastimclogapi.data;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import co.elastic.clients.elasticsearch.core.bulk.CreateOperation;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public class DataManager {
     private final Plugin plugin;
@@ -24,14 +26,42 @@ public class DataManager {
     }
 
     /**
+     * Query objects from index
+     */
+    public List<? extends Hit<?>> query(Class<?> classType, Map<String, Object> parameters) throws IOException {
+        List<Query> queries = new ArrayList<>();
+        parameters.forEach((key, value) -> {
+            if (value instanceof String) {
+                queries.add(new Query(new TermQuery.Builder()
+                        .field(key)
+                        .value(v -> v.stringValue(String.valueOf(value)))
+                        .build())
+                );
+            } else if (value instanceof Number) {
+                queries.add(new Query(new TermQuery.Builder()
+                        .field(key)
+                        .value(v -> v.stringValue(String.valueOf(value)))
+                        .build())
+                );
+            }
+        });
+        return new ESClients(configuration).getClient()
+                .search(s -> s
+                        .index((configuration.getString("config.base-index-name", "mc-log") +
+                                "-" + classType.getSimpleName()).toLowerCase(Locale.ROOT))
+                        .query(q -> q.bool(new BoolQuery.Builder().must(queries).build())),
+                        classType).hits().hits();
+    }
+
+    /**
      * Add an object to pending saves
      */
     public void addPending(Object object) {
         pendingBulk.add(new BulkOperation.Builder()
                 .create(
                         new CreateOperation.Builder<>()
-                                .index(configuration.getString("config.base-index-name", "mc-log") +
-                                        "-" + object.getClass().getName().toLowerCase(Locale.ROOT))
+                                .index((configuration.getString("config.base-index-name", "mc-log") +
+                                        "-" + object.getClass().getSimpleName()).toLowerCase(Locale.ROOT))
                                 .document(object)
                                 .build()
                 )
@@ -72,10 +102,11 @@ public class DataManager {
      * Execute all reaming pending in sync
      */
     public void closePool() {
+        if (pool==null) return;
         pool.stop();
         ESClients esClients = new ESClients(configuration);
         try {
-            esClients.getClient().bulk(
+            if (pendingBulk.size()>0) esClients.getClient().bulk(
                     new BulkRequest.Builder()
                             .operations(pendingBulk)
                             .build()
@@ -91,6 +122,7 @@ public class DataManager {
      * Close without processing {@link #pendingBulk}
      */
     public void forceClosePool() {
+        if (pool==null) return;
         pool.stop();
         pool = null;
     }

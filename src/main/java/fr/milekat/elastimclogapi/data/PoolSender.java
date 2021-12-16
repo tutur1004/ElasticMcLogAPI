@@ -29,7 +29,7 @@ public class PoolSender {
         return Bukkit.getScheduler().runTaskTimerAsynchronously(JavaPlugin.getPlugin(ESMcLog.class), () -> {
             ESClients esClients = new ESClients(configuration);
             try {
-                esClients.getAsyncClient().bulk(
+                if (pendingBulk.size()>0) esClients.getAsyncClient().bulk(
                         new BulkRequest.Builder()
                                 .operations(pendingBulk)
                                 .build()
