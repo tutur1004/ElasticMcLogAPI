@@ -1,5 +1,9 @@
 package fr.milekat.elastimclogapi.data;
 
+import co.elastic.clients.elasticsearch._types.FieldSort;
+import co.elastic.clients.elasticsearch._types.SortMode;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
@@ -11,7 +15,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class DataManager {
     private final Plugin plugin;
@@ -28,8 +35,9 @@ public class DataManager {
     /**
      * Query objects from index
      */
-    public List<? extends Hit<?>> query(Class<?> classType, Map<String, Object> parameters) throws IOException {
-        List<Query> queries = new ArrayList<>();
+    public List<? extends Hit<?>> query(Object object, Map<String, Object> parameters,
+                                        Map<String, Boolean> sorts, int limit) throws IOException {
+        List<Query> queries = new LinkedList<>();
         parameters.forEach((key, value) -> {
             if (value instanceof String) {
                 queries.add(new Query(new TermQuery.Builder()
@@ -45,12 +53,23 @@ public class DataManager {
                 );
             }
         });
+        List<SortOptions> sortOptions = new LinkedList<>();
+        sorts.forEach((field, sort) -> sortOptions.add(new SortOptions.Builder().field(new FieldSort.Builder()
+                .field(field)
+                .mode(sort ? SortMode.Max : SortMode.Min)
+                .order(sort ? SortOrder.Desc : SortOrder.Asc)
+                .build()).build())
+        );
         return new ESClients(configuration).getClient()
                 .search(s -> s
-                        .index((configuration.getString("config.base-index-name", "mc-log") +
-                                "-" + classType.getSimpleName()).toLowerCase(Locale.ROOT))
-                        .query(q -> q.bool(new BoolQuery.Builder().must(queries).build())),
-                        classType).hits().hits();
+                                .index((configuration.getString("config.base-index-name", "mc-log") +
+                                        "-" + object.getClass().getSimpleName()).toLowerCase(Locale.ROOT))
+                                .query(q -> q.bool(new BoolQuery.Builder().must(queries).build()))
+                                .size(limit)
+                                .sort(sortOptions)
+                        , object.getClass())
+                .hits()
+                .hits();
     }
 
     /**
